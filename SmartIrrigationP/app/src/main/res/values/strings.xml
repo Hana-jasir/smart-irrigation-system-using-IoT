@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Smart Irrigation P</string>
+    <string name="moister_level">Moister level</string>
+    <string name="watering_hestory">Watering History</string>
+    <string name="log_in">Log in</string>
+    <string name="raspberry_pi">Raspberry Pi</string>
+    <string name="manual">Manual</string>
+    <string name="low">low</string>
+    <string name="wataring_mode">Watering mode</string>
+    <string name="on">on</string>
+    <string name="watar_pump">Water Pump</string>
+    <string name="field">Field</string>
+    <string name="sing_out">Sign Out</string>
+    <string name="app_logo">app logo</string>
+    <string name="wataring_history">Watering History</string>
+    <string name="back">Back</string>
+    <string name="raspberry_pi_id">User ID</string>
+    <string name="off">off</string>
+    <string name="light">Light</string>
+    <string name="logInEr">The entered ID is wrong</string>
+    <string name="addfield">addField</string>
+    <string-array name="fields">
+        <item>Field_1</item>
+    </string-array>
+</resources>

@@ -1,0 +1,103 @@
+Class smartIrrigationSystem.py
+
+#!/usr/bin/python
+import RPi.GPIO as GPIO
+import time
+from datetime import datetime
+from firebase import firebase
+firebase = firebase.FirebaseApplication('https://smart-irrigation-70d13.firebaseio.com/', None)
+# GPIO SETUP
+channel1 = 21  # sensor
+channel2 = 20  # motor/relay
+#channel3 =   # Light
+now=datetime.now()
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(channel1, GPIO.IN)
+GPIO.setup(channel2, GPIO.OUT)
+#GPIO.setup(channel3, GPIO.OUT)
+mode = GPIO.getmode()
+
+
+def motor_on(pin):
+    GPIO.output(pin, GPIO.HIGH)  # Turn motor on
+
+
+def motor_off(pin):
+    GPIO.output(pin, GPIO.LOW)  # Turn motor off
+
+#this is automatic section
+def callback(channel1):
+    manual=firebase.get('/smart-irrigation-70d13/Field/Field1/Manual', '')
+    water_pump = firebase.get('/smart-irrigation-70d13/Field/Field1/Motor', '')
+    Manual(manual,water_pump)
+    if GPIO.input(channel1):
+        moisture = GPIO.input(channel1)
+        result1 = firebase.put('/smart-irrigation-70d13/Field/Field1', 'Moisture',moisture)
+        print ("no water Detected!")
+        print (GPIO.input(channel1))
+        motor_on(channel2)
+        motor = GPIO.input(channel2)
+        result1 = firebase.put('/smart-irrigation-70d13/Field/Field1', 'Motor','on')
+        time.sleep(1)
+        motor_off(channel2)
+        time.sleep(1)
+        date_Time = now.strftime("off %d/%m/%Y %H:%M:%S")#time water pump was off
+        result = firebase.post('/smart-irrigation-70d13/History/', date_Time)#update the watering history in database
+#GPIO.cleanup()
+
+
+    else:
+        moisture = GPIO.input(channel1)
+        result1 = firebase.put('/smart-irrigation-70d13/Field/Field1', 'Moisture',moisture)
+        print ("Water Detected!")
+        print (GPIO.input(channel1))
+        motor_off(channel2)
+        time.sleep(1)
+        motor = GPIO.input(channel2)
+        result1 = firebase.put('/smart-irrigation-70d13/Field/Field1', 'Motor','off')
+        date_Time = now.strftime("off %d/%m/%Y %H:%M:%S")#time water pump was off
+        result = firebase.post('/smart-irrigation-70d13/History/', date_Time)#update the watering history in database
+
+
+
+# FieldNum=firebase.get('/smart-irrigation-70d13/FieldNum','')
+# read manual yes or no take field number and update field status
+# this is manual section
+def Manual(manual,water_pump):
+
+    while manual=="1":
+        print ("manual on")
+        water_pump = firebase.get('/smart-irrigation-70d13/Field/Field1/Motor', '')
+
+        if water_pump == "on":
+            print ("pump on")
+            motor_on(channel2)
+            time.sleep(1)
+            motor_off(channel2)
+            time.sleep(1)
+            date_Time = now.strftime("on %d/%m/%Y %H:%M:%S")#time water pump was on
+            result = firebase.post('/smart-irrigation-70d13/History/', date_Time)#update the watering history in database
+            moisture = GPIO.input(channel1)
+            result1 = firebase.put('/smart-irrigation-70d13/Field/Field1','Moisture', moisture)
+
+        if  water_pump == "off":
+            print ("pump off")
+            motor_off(channel2)
+            time.sleep(1)
+            date_Time = now.strftime("off %d/%m/%Y %H:%M:%S")#time water pump was off
+            result = firebase.post('/smart-irrigation-70d13/History/', date_Time)#update the watering history in database
+            moisture = GPIO.input(channel1)
+            result1 = firebase.put('/smart-irrigation-70d13/Field/Field1','Moisture', moisture)
+
+        manual=firebase.get('/smart-irrigation-70d13/Field/Field1/Manual', '')
+
+
+# if manual == "0":
+#      motor_off(channel2)
+#      time.sleep(1)
+#      date_Time = now.strftime("off %d/%m/%Y %H:%M:%S")#time water pump was off
+#      result = firebase.post('/smart-irrigation-70d13/History/', date_Time)#update the watering history in database
+#
+
+# store soil low-high
